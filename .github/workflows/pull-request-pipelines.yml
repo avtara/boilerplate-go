@@ -1,0 +1,39 @@
+name: Pull Request Check Up
+
+on: [pull_request]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.20.3
+
+      - name: Golangci-lint and Complexity
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.51.2
+          args: --print-issued-lines=false --exclude-use-default=false --fix --timeout=3m
+
+      - name: Unit Test
+        run: go test $(go list ./... | grep -v /mocks/) --race -v -short -coverprofile=profile.cov
+
+      - name: Test Goverage Threshold
+        run: |
+          totalCoverage=`go tool cover -func profile.cov | grep total | grep -Eo '[0-9]+\.[0-9]+'`
+          
+          if ! awk "BEGIN{ exit ($totalCoverage >= 0) }"
+          then
+              echo "Test Coverage: $totalCoverage% [PASSED]\n"
+          else
+              echo "Test Coverage: $totalCoverage% [BELOW THRESHOLD]\n"
+              exit 1
+          fi
+
+      - name: Build
+        run: go build -v ./...
