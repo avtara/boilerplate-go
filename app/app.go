@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/avtara/boilerplate-go/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"log"
 	"os"
 )
@@ -11,6 +13,7 @@ import (
 type App struct {
 	Hostname string
 	Server   *gin.Engine
+	DB       *sqlx.DB
 }
 
 func New() App {
@@ -20,6 +23,7 @@ func New() App {
 	most(cfg.InitViper())
 	most(cfg.InitLogrus())
 	most(cfg.InitServer())
+	most(cfg.InitPostgres())
 
 	most(cfg.InitService())
 
