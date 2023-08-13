@@ -33,3 +33,12 @@ func (a *userRepository) GetLastLoginByUsernameOrEmail(ctx context.Context, args
 
 	return
 }
+
+func (a *userRepository) Save(ctx context.Context, args models.RegisterUserRequest) (id int64, err error) {
+	err = a.conn.QueryRowContext(ctx, queries.CreateAccount, args.Username, args.Password, args.Email).Scan(&id)
+	if err != nil {
+		return
+	}
+
+	return
+}

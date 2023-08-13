@@ -15,4 +15,6 @@ func (so *svObject) initRoute() {
 	users := so.Service.Group("/users")
 
 	users.GET("/last-login", so.handlerGetLastLogin)
+	users.POST("/register", so.handlerRegister)
+
 }
