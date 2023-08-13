@@ -11,4 +11,8 @@ func (so *svObject) initRoute() {
 			"message": "pong",
 		})
 	})
+
+	users := so.Service.Group("/users")
+
+	users.GET("/last-login", so.handlerGetLastLogin)
 }
