@@ -7,7 +7,7 @@ import (
 	"github.com/hibiken/asynq"
 )
 
-func (so *aqObject) handlerProcessTaskSendEmail(ctx context.Context, task *asynq.Task) error {
+func (so *aqObject) handlerProcessTaskSendEmail(ctx context.Context, task *asynq.Task) (err error) {
 	type PayloadSendEmailWelcome struct {
 		Email string `json:"email"`
 	}
@@ -18,6 +18,6 @@ func (so *aqObject) handlerProcessTaskSendEmail(ctx context.Context, task *asynq
 		return fmt.Errorf("failed to unmarshal payload: %w", asynq.SkipRetry)
 	}
 
-	fmt.Println("ini dari handler", payload.Email)
-	return nil
+	fmt.Println("Send email to:", payload.Email)
+	return
 }
