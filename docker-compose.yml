@@ -1,5 +1,12 @@
 version: '3.1'
 
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.3.0.0/24
+
 services:
 
   postgres:
@@ -27,10 +34,13 @@ services:
       - 'redis_data:/bitnami/redis/data'
     networks:
       vpcbr:
-        ipv4_address: 10.5.0.2
+        ipv4_address: 10.3.0.5
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 8080:8080
+volumes:
+  redis_data:
+    driver: local
