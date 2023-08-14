@@ -6,9 +6,10 @@ import (
 	"github.com/avtara/boilerplate-go/internal/models"
 	"github.com/avtara/boilerplate-go/internal/service"
 	"github.com/avtara/boilerplate-go/utils"
-	"github.com/google/martian/log"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type userUsecase struct {
@@ -58,7 +59,7 @@ func (u *userUsecase) Register(ctx context.Context, args models.RegisterUserRequ
 		"email": args.Email,
 	})
 	if err != nil {
-		log.Errorf("%s", err)
+		log.Error("[UseCase][Register][Publish] %s", err.Error())
 	}
 
 	return
