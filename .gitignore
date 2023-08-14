@@ -6,3 +6,4 @@ coverage.out
 .vendor/
 /bin
 /tmp
+/redis_data

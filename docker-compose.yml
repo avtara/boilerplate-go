@@ -13,6 +13,22 @@ services:
       - POSTGRES_USER=boilerplate_go
       - POSTGRES_DB=boilerplate_go_db
 
+  redis:
+    image: docker.io/bitnami/redis:6.2
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - '6379:6379'
+    expose:
+      - "6379"
+    volumes:
+      - 'redis_data:/bitnami/redis/data'
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.2
+
   adminer:
     image: adminer
     restart: always
