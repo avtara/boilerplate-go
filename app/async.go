@@ -10,7 +10,6 @@ func (cfg *App) InitAsynq() (err error) {
 	client := asynq.NewClient(asynq.RedisClientOpt{
 		Addr: fmt.Sprintf("%s:%s", "127.0.0.1", utils.GetConfig("redis.port", "6379")),
 	})
-	//defer client.Close()
 
 	server := asynq.NewServer(
 		asynq.RedisClientOpt{

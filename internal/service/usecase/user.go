@@ -2,25 +2,24 @@ package usecase
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/avtara/boilerplate-go/internal/models"
 	"github.com/avtara/boilerplate-go/internal/service"
 	"github.com/avtara/boilerplate-go/utils"
-	"github.com/hibiken/asynq"
+	"github.com/google/martian/log"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
 )
 
 type userUsecase struct {
-	userRepository service.UserRepository
-	asynqClient    *asynq.Client
+	userRepository  service.UserRepository
+	asyncRepository service.AsynqRepository
 }
 
-func NewUserUseCase(userRepository service.UserRepository, asynqClient *asynq.Client) service.UserUsecase {
+func NewUserUseCase(userRepository service.UserRepository, asyncRepository service.AsynqRepository) service.UserUsecase {
 	return &userUsecase{
-		userRepository: userRepository,
-		asynqClient:    asynqClient,
+		userRepository:  userRepository,
+		asyncRepository: asyncRepository,
 	}
 }
 
@@ -55,25 +54,12 @@ func (u *userUsecase) Register(ctx context.Context, args models.RegisterUserRequ
 		Token:    token,
 	}
 
-	type PayloadSendVerifyEmail struct {
-		Username string `json:"username"`
-	}
-
-	var payload PayloadSendVerifyEmail
-
-	jsonPayload, err := json.Marshal(payload)
+	_, err = u.asyncRepository.Publish(ctx, models.TypeNameTaskSendEmailWelcome, map[string]string{
+		"email": args.Email,
+	})
 	if err != nil {
-		return
+		log.Errorf("%s", err)
 	}
-
-	task := asynq.NewTask("task:send_email_welcome", jsonPayload)
-	info, err := u.asynqClient.EnqueueContext(ctx, task)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	fmt.Println(info.Result)
 
 	return
 }

@@ -8,16 +8,16 @@ import (
 )
 
 func (so *aqObject) handlerProcessTaskSendEmail(ctx context.Context, task *asynq.Task) error {
-	type PayloadSendVerifyEmail struct {
-		Username string `json:"username"`
+	type PayloadSendEmailWelcome struct {
+		Email string `json:"email"`
 	}
 
-	var payload PayloadSendVerifyEmail
+	var payload PayloadSendEmailWelcome
 
 	if err := json.Unmarshal(task.Payload(), &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal payload: %w", asynq.SkipRetry)
 	}
 
-	fmt.Println("ini dari handler")
+	fmt.Println("ini dari handler", payload.Email)
 	return nil
 }

@@ -1,6 +1,7 @@
 package asynq
 
 import (
+	"github.com/avtara/boilerplate-go/internal/models"
 	"github.com/hibiken/asynq"
 )
 
@@ -21,6 +22,6 @@ func NewAsyncHandler(
 		asynqServer: asynqServer,
 	}
 
-	asynqMux.HandleFunc("task:send_email_welcome", obj.handlerProcessTaskSendEmail)
+	asynqMux.HandleFunc(models.TypeNameTaskSendEmailWelcome, obj.handlerProcessTaskSendEmail)
 	asynqServer.Start(asynqMux)
 }
