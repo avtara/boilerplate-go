@@ -4,11 +4,13 @@ import (
 	"github.com/avtara/boilerplate-go/internal/service"
 	"github.com/avtara/boilerplate-go/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/hibiken/asynq"
 )
 
 type svObject struct {
 	Service     *gin.Engine
 	UserUsecase service.UserUsecase
+	Asynq       *asynq.Client
 
 	IsSystemMaintenance bool
 }

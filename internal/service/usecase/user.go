@@ -2,21 +2,25 @@ package usecase
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/avtara/boilerplate-go/internal/models"
 	"github.com/avtara/boilerplate-go/internal/service"
 	"github.com/avtara/boilerplate-go/utils"
+	"github.com/hibiken/asynq"
 	"golang.org/x/crypto/bcrypt"
 	"strings"
 )
 
 type userUsecase struct {
 	userRepository service.UserRepository
+	asynqClient    *asynq.Client
 }
 
-func NewUserUseCase(userRepository service.UserRepository) service.UserUsecase {
+func NewUserUseCase(userRepository service.UserRepository, asynqClient *asynq.Client) service.UserUsecase {
 	return &userUsecase{
 		userRepository: userRepository,
+		asynqClient:    asynqClient,
 	}
 }
 
@@ -50,6 +54,26 @@ func (u *userUsecase) Register(ctx context.Context, args models.RegisterUserRequ
 		Email:    args.Email,
 		Token:    token,
 	}
+
+	type PayloadSendVerifyEmail struct {
+		Username string `json:"username"`
+	}
+
+	var payload PayloadSendVerifyEmail
+
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return
+	}
+
+	task := asynq.NewTask("task:send_email_welcome", jsonPayload)
+	info, err := u.asynqClient.EnqueueContext(ctx, task)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	fmt.Println(info.Result)
 
 	return
 }

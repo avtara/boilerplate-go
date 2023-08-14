@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/avtara/boilerplate-go/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/hibiken/asynq"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
@@ -11,9 +12,12 @@ import (
 )
 
 type App struct {
-	Hostname string
-	Server   *gin.Engine
-	DB       *sqlx.DB
+	Hostname    string
+	Server      *gin.Engine
+	DB          *sqlx.DB
+	Asynq       *asynq.Client
+	AsynqServer *asynq.Server
+	AsynqMux    *asynq.ServeMux
 }
 
 func New() App {
@@ -22,6 +26,7 @@ func New() App {
 	cfg.Hostname, _ = os.Hostname()
 	most(cfg.InitViper())
 	most(cfg.InitLogrus())
+	most(cfg.InitAsynq())
 	most(cfg.InitServer())
 	most(cfg.InitPostgres())
 
