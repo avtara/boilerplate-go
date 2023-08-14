@@ -2,8 +2,8 @@ package server
 
 import (
 	"github.com/avtara/boilerplate-go/internal/models"
+	"github.com/avtara/boilerplate-go/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/lib/pq"
 	"net/http"
 )
 
@@ -44,21 +44,7 @@ func (so *svObject) handlerRegister(ctx *gin.Context) {
 
 	result, err := so.UserUsecase.Register(ctx.Request.Context(), json)
 	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
-			switch pqErr.Code.Name() {
-			case "foreign_key_violation", "unique_violation":
-				ctx.JSON(http.StatusForbidden, gin.H{
-					"error": err.Error(),
-				})
-				return
-			}
-		}
-		return
-		ctx.JSON(http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			})
-		return
+		utils.ErrorResponse(ctx, err)
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
@@ -79,12 +65,7 @@ func (so *svObject) handlerLogin(ctx *gin.Context) {
 
 	result, err := so.UserUsecase.Auth(ctx.Request.Context(), json)
 	if err != nil {
-		return
-		ctx.JSON(http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			})
-		return
+		utils.ErrorResponse(ctx, err)
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{

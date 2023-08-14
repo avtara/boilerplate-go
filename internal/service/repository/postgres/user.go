@@ -6,6 +6,8 @@ import (
 	"github.com/avtara/boilerplate-go/internal/service"
 	"github.com/avtara/boilerplate-go/internal/service/repository/postgres/queries"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
+	"strings"
 )
 
 type userRepository struct {
@@ -36,6 +38,13 @@ func (a *userRepository) GetLastLoginByUsernameOrEmail(ctx context.Context, args
 
 func (a *userRepository) Save(ctx context.Context, args models.RegisterUserRequest) (id int64, err error) {
 	err = a.conn.QueryRowContext(ctx, queries.CreateAccount, args.Username, args.Password, args.Email).Scan(&id)
+	if pqErr, ok := err.(*pq.Error); ok {
+		switch pqErr.Code.Name() {
+		case "foreign_key_violation", "unique_violation":
+			return id, models.ErrorUserDuplicate
+		}
+	}
+
 	if err != nil {
 		return
 	}
@@ -50,6 +59,11 @@ func (a *userRepository) GetUserByUsernameOrEmail(ctx context.Context, args mode
 		args.Username,
 		args.Email,
 	).Scan(&result.ID, &result.Username, &result.Email, &result.Password)
+
+	if strings.Contains(err.Error(), "no rows") {
+		return result, models.ErrorUserNotFound
+	}
+
 	if err != nil {
 		return
 	}

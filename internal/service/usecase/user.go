@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"github.com/avtara/boilerplate-go/internal/models"
 	"github.com/avtara/boilerplate-go/internal/service"
 	"github.com/avtara/boilerplate-go/utils"
@@ -33,7 +32,7 @@ func (u *userUsecase) GetLastLogin(ctx context.Context, args models.GetLastLogin
 func (u *userUsecase) Register(ctx context.Context, args models.RegisterUserRequest) (result models.RegisterUserResponse, err error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(args.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return
+		return result, models.ErrorInternalServer
 	}
 
 	args.Password = string(hashedPassword)
@@ -41,12 +40,12 @@ func (u *userUsecase) Register(ctx context.Context, args models.RegisterUserRequ
 
 	id, err := u.userRepository.Save(ctx, args)
 	if err != nil {
-		return
+		return result, err
 	}
 
 	token, err := utils.GenerateToken(id)
 	if err != nil {
-		return
+		return result, models.ErrorInternalServer
 	}
 
 	result = models.RegisterUserResponse{
@@ -67,20 +66,18 @@ func (u *userUsecase) Register(ctx context.Context, args models.RegisterUserRequ
 
 func (u *userUsecase) Auth(ctx context.Context, args models.LoginUserRequest) (result models.LoginUserResponse, err error) {
 	user, err := u.userRepository.GetUserByUsernameOrEmail(ctx, args)
-	fmt.Println(err, user)
-
 	if err != nil {
-		return
+		return result, err
 	}
 
 	err = utils.VerifyPassword(args.Password, user.Password)
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
-		return
+		return result, models.ErrorUserWrongPassword
 	}
 
 	token, err := utils.GenerateToken(user.ID)
 	if err != nil {
-		return
+		return result, models.ErrorInternalServer
 	}
 
 	result = models.LoginUserResponse{
