@@ -23,4 +23,23 @@ type (
 		Email    string `json:"email"`
 		Token    string `json:"token"`
 	}
+
+	LoginUserRequest struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Password string `json:"password" binding:"required"`
+	}
+
+	LoginUserResponse struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Token    string `json:"token"`
+	}
+
+	User struct {
+		ID       int64  `db:"user_id"`
+		Username string `db:"username"`
+		Email    string `db:"email"`
+		Password string `db:"password"`
+	}
 )

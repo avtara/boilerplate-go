@@ -16,5 +16,5 @@ func (so *svObject) initRoute() {
 
 	users.GET("/last-login", so.handlerGetLastLogin)
 	users.POST("/register", so.handlerRegister)
-
+	users.POST("/login", so.handlerLogin)
 }

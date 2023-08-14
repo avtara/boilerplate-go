@@ -66,3 +66,29 @@ func (so *svObject) handlerRegister(ctx *gin.Context) {
 	})
 	return
 }
+
+func (so *svObject) handlerLogin(ctx *gin.Context) {
+	var json models.LoginUserRequest
+	if err := ctx.ShouldBindJSON(&json); err != nil {
+		ctx.JSON(http.StatusBadRequest,
+			gin.H{
+				"error": err.Error(),
+			})
+		return
+	}
+
+	result, err := so.UserUsecase.Auth(ctx.Request.Context(), json)
+	if err != nil {
+		return
+		ctx.JSON(http.StatusInternalServerError,
+			gin.H{
+				"error": err.Error(),
+			})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"data": result,
+	})
+	return
+}

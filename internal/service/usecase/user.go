@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"github.com/avtara/boilerplate-go/internal/models"
 	"github.com/avtara/boilerplate-go/internal/service"
 	"github.com/avtara/boilerplate-go/utils"
@@ -47,6 +48,33 @@ func (u *userUsecase) Register(ctx context.Context, args models.RegisterUserRequ
 	result = models.RegisterUserResponse{
 		Username: args.Username,
 		Email:    args.Email,
+		Token:    token,
+	}
+
+	return
+}
+
+func (u *userUsecase) Auth(ctx context.Context, args models.LoginUserRequest) (result models.LoginUserResponse, err error) {
+	user, err := u.userRepository.GetUserByUsernameOrEmail(ctx, args)
+	fmt.Println(err, user)
+
+	if err != nil {
+		return
+	}
+
+	err = utils.VerifyPassword(args.Password, user.Password)
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return
+	}
+
+	token, err := utils.GenerateToken(user.ID)
+	if err != nil {
+		return
+	}
+
+	result = models.LoginUserResponse{
+		Username: user.Username,
+		Email:    user.Email,
 		Token:    token,
 	}
 

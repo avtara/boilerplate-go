@@ -42,3 +42,17 @@ func (a *userRepository) Save(ctx context.Context, args models.RegisterUserReque
 
 	return
 }
+
+func (a *userRepository) GetUserByUsernameOrEmail(ctx context.Context, args models.LoginUserRequest) (result models.User, err error) {
+	err = a.conn.QueryRowContext(
+		ctx,
+		queries.GetUserByUsernameOrEmail,
+		args.Username,
+		args.Email,
+	).Scan(&result.ID, &result.Username, &result.Email, &result.Password)
+	if err != nil {
+		return
+	}
+
+	return
+}

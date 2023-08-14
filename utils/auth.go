@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
@@ -16,4 +17,8 @@ func GenerateToken(user_id int64) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	return token.SignedString([]byte((GetConfig("jwt.secret_key", "LoheLoheRahasia"))))
+}
+
+func VerifyPassword(password, hashedPassword string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
